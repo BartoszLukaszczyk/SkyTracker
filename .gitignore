@@ -1,0 +1,11 @@
+# Build artifacts
+build/
+*.o
+*.exe
+
+# Qt Creator project user data
+*.pro.user
+
+# Arduino compiled binaries
+*.hex
+*.bin

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Wszystkie połączenia HTTPS będą weryfikowane przez systemowy store -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <!-- jeśli masz self-signed CA, dodaj tu:
+            <certificates src="@raw/your_ca" />
+            i wrzuć your_ca.pem do android/res/raw/ -->
+        </trust-anchors>
+    </base-config>
+
+    <!-- Dla konkretnej domeny możesz wymusić np. tylko certyfikaty z tej listy:
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.yourserver.com</domain>
+        <trust-anchors>
+            <certificates src="@raw/your_ca" />
+        </trust-anchors>
+    </domain-config>
+    -->
+</network-security-config>

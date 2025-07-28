@@ -1,0 +1,5 @@
+<!DOCTYPE RCC><RCC version="1.0">
+  <qresource prefix="/certs">
+    <file alias="cacert.pem">certs/cacert.pem</file>
+  </qresource>
+</RCC>
