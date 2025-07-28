@@ -46,7 +46,12 @@ This project is fully open-source, including hardware, 3D models, and software.
 - IMU (MPU-6050) and compass (QMC5883L)
 - Limit switches for both axes
 - 12V 8A power supply
-- Optional modules (GPS, fan + thermistor) were initially planned but removed due to complexity and noise. ESP32 provides sufficient time sync via Bluetooth, and the fan introduced mechanical vibrations.
+
+Optional modules (GPS and fan with thermistor) were initially planned but removed during development:
+
+The GPS module caused reliability issues and was replaced by the smartphone's internal GPS.
+
+The fan, controlled by a thermistor, was counterproductive — it was the main source of heat buildup, especially affecting the buck converter. Removing it simplified the system and improved thermal stability.
 
 Block diagram and wiring diagrams are included in `docs/`.
 
@@ -54,28 +59,52 @@ Block diagram and wiring diagrams are included in `docs/`.
 
 ## Software Overview
 
-### Qt App (Android)
+### Android App
 
-- Written in C++ using **Qt Creator 6.9.1** and built using `qmake`
-- UI with real-time manual control (5-step click or smooth hold)
-- Device must be first paired in Android BT settings
+- Written in C++ using **Qt Creator 6.9.1**, built with **qmake**
+- Requires pairing with ESP32 via Android system Bluetooth settings
+- Device must be selected from **paired devices** inside the app
+- ⚠️ “Connected” message may appear even if pairing fails – verify manually
+
 
 ### ESP32 Firmware
+- Written in C++ using **Arduino IDE**
+- Receives commands from Android app over Bluetooth serial
 
-- Written in C++ using Arduino IDE
-- Receives commands like `UP`, `DOWN`, `STEP`, `PREP`, `FRIGHT`, etc.
-- Homing routine: moves to limit switches, backs off 100 steps, then sets position to 180S/45El
+---
 
-### Tracking Logic
+### 🎮 Manual Control
 
-- User selects object (Sun, Moon, planets)
-- App retrieves phone GPS location and calls JPL Horizons API
-- Ephemerides downloaded for 1 hour ahead, 1-minute resolution
-- Data converted RA/DEC → Alt/Az (with GMST correction)
-- Spherical interpolation at 4-second intervals
-- Result: sequence of `deltaPan`, `deltaTilt` every 4 seconds
-- Tracking starts \~1 minute after target selection
-- App must stay connected and in foreground (depending on Android battery settings)
+- Single tap = 5 motor steps
+- Hold = continuous smooth motion
+
+---
+
+### 🧭 Homing / Calibration
+
+1. Move both axes toward endstops
+2. Back off 100 steps
+3. Read orientation from IMU + compass
+4. Set virtual position to **180° Azimuth / 45° Elevation**
+
+This is the reference position for tracking.
+
+---
+
+### 🌌 Object Tracking
+
+1. User selects object from list
+2. App gets phone's GPS location
+3. Ephemerides fetched via **JPL Horizons API**
+4. 1-hour dataset downloaded (1-minute resolution)
+5. Az/El positions calculated, corrected for Earth's rotation
+6. **Spherical interpolation** every 4 seconds
+7. Motor steps computed based on current gear ratios
+8. Motion starts between minute 1–2 after object selection
+
+- Manual adjustments are allowed during tracking
+- Phone must remain connected via Bluetooth
+- Power-saving settings may require app to stay foregrounded
 
 ---
 
